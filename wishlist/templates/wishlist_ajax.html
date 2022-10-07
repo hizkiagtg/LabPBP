@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+    $(document).ready(function(){
+    get_data();
+    $( "added-data" ).submit(function( event ) {
+        event.preventDefault();
+        var actionurl = event.currentTarget.action;
+        $.ajax({
+                url: actionurl,
+                type: 'post',
+                dataType: 'json',
+                data: $("added-data").serialize(),
+                success: function(data) {
+                    var tr = $("<tr></tr>");
+                    for (const [key, value] of Object.entries(data)) {
+                        var td = $("<td></td>").html(value);
+                        tr.append(td);
+                    }
+                    $("#tabel").append(tr);
+                },
+                error: function(){
+                    alert("ERROR");
+                }
+        });
+    });
+});
+
+function get_data() {
+    $.get("wishlist/json", function(data) {
+        data.forEach(element => {
+            var tr = $("<tr></tr>");
+            for (const [key, value] of Object.entries(element.fields)) {
+                var td = $("<td></td>").html(value);
+                tr.append(td);
+            }
+            $("tabel").append(tr);
+        });
+    });
+}
+</script>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+</head>
+<nav class="navbar" style="background-color: #e3f2fd;">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Hai, {{nama}}</a>
+      <a class="btn btn-primary btn-lg" href="{% url 'wishlist:logout' %}" role="button">Logout</a>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+</nav>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <table id = "tabel" class="table table-striped table-hover">
+        <tr>
+        <th>Nama Barang</th>
+        <th>Harga Barang</th>
+        <th>Deskripsi</th>
+        </tr>
+        {% comment %} Tambahkan data di bawah baris ini {% endcomment %}
+        {% for barang in list_barang %}
+            <tr>
+                <th>{{barang.nama_barang}}</th>
+                <th>{{barang.harga_barang}}</th>
+                <th>{{barang.deskripsi}}</th>
+            </tr>
+        {% endfor %}
+    </table>
+</head>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <table class="table table-striped table-hover">
+    <form method="POST" action="{% url 'wishlist:submit_ajax' %}">
+        {% csrf_token %}
+        <table>
+            <th>Tambahkan barang baru</th>
+            <tr>
+                <td>Nama Barang: </td>
+                <td><input id = "added-data" type="text" name="nama"  class="form-control"></td>
+            </tr>
+                    
+            <tr>
+                <td>Harga Barang: </td>
+                <td><input id = "added-data" type="text" name="harga"   class="form-control"></td>
+            </tr>
+            <tr>
+                <td>Deskripsi: </td>
+                <td><input id = "added-data" type="text" name="deskripsi"   class="form-control"></td>
+            </tr>
+            
+        </table>
+        <a class="btn btn-primary btn-lg" href="{% url 'wishlist:submit_ajax' %}" role="button">Submit</a>
+    </form>
+</head>
+<div class="alert alert-info" role="alert">
+    Sesi terakhir login: {{ last_login }}
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
+
+{% endblock content %}
